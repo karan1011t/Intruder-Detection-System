@@ -105,15 +105,28 @@ void logEvent(const char* eventType, const char* value) {
     
     // Calculate Risk Score
     int riskScore = 0;
-    if (state.threat == "HIGH") riskScore = 90;
-    else if (state.threat == "LOW") riskScore = 30;
+
+        if (state.threat == "HIGH")
+    riskScore = 90;
+else if (state.threat == "MEDIUM")
+    riskScore = 60;
+else if (state.threat == "LOW")
+    riskScore = 30;
     
     // Requirements #5: Create an Insight field based on sensor values and threat level
     String insight = "Normal Operations";
     if (strcmp(eventType, "THREAT_DETECTED") == 0) {
-         if (state.threat == "HIGH") insight = "Critical: Multi-sensor breach confirmed";
-         else if (state.threat == "LOW") insight = "Warning: Perimeter activity detected";
-    } else if (strcmp(eventType, "ALARM_TRIGGERED") == 0) {
+
+     if (state.threat == "HIGH")
+         insight = "Critical: Immediate threat detected";
+
+     else if (state.threat == "MEDIUM")
+         insight = "Warning: Object approaching restricted area";
+
+     else if (state.threat == "LOW")
+         insight = "Notice: Activity detected at perimeter";
+}
+    else if (strcmp(eventType, "ALARM_TRIGGERED") == 0) {
          insight = "Action Required: Alarm activated";
     } else if (strcmp(eventType, "ALARM_STOPPED") == 0) {
          insight = "System Reset: Alarm suppressed";
@@ -408,18 +421,32 @@ void loop() {
     }
 
     // 4. DETECTION LOGIC
-    bool usActive = (state.systemEnabled && state.ultrasonicEnabled && state.distance > 0 && state.distance < DISTANCE_THRESHOLD_CM);
+    // 4. DETECTION LOGIC
+
     if (!state.systemEnabled) {
         state.threat = "NONE";
-    } else if (state.motion && usActive) {
+}
+    else if (state.motion) {
+    state.threat = "HIGH";
+}
+else if (state.ultrasonicEnabled) {
+
+    if (state.distance > 0 && state.distance <= 30) {
         state.threat = "HIGH";
-    } else if (state.motion) {
-        state.threat = "HIGH";
-    } else if (usActive) {
+    }
+    else if (state.distance > 30 && state.distance <= 70) {
+        state.threat = "MEDIUM";
+    }
+    else if (state.distance > 70 && state.distance <= 100) {
         state.threat = "LOW";
-    } else {
+    }
+    else {
         state.threat = "NONE";
     }
+}
+else {
+    state.threat = "NONE";
+}
 
     if (state.threat != lastThreat) {
         if (state.threat == "HIGH" || state.threat == "LOW") {

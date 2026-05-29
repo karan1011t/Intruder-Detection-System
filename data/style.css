@@ -93,3 +93,18 @@ h1, h2, h3, h4, h5, h6, .card-label {
 }
 .text-active { color: #2a9d8f; }
 .text-inactive { color: #666; }
+.threat-high {
+    color: #ff0000;
+}
+
+.threat-medium {
+    color: #ff9800;
+}
+
+.threat-low {
+    color: #ffd600;
+}
+
+.threat-none {
+    color: #00ff66;
+}

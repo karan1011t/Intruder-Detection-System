@@ -15,7 +15,9 @@
 const char* AP_SSID = "IntruderSystem";
 const char* AP_PASS = "12345678";
 
-const int DISTANCE_THRESHOLD_CM = 100;
+const int LOW_THREAT_DISTANCE = 100;
+const int MEDIUM_THREAT_DISTANCE = 70;
+const int HIGH_THREAT_DISTANCE = 30;
 const unsigned long ALARM_DURATION_MS = 10000;
 const unsigned long PIR_DEBOUNCE_MS = 2000;
 const unsigned long ULTRASONIC_INTERVAL_MS = 500;
@@ -105,15 +107,27 @@ void logEvent(const char* eventType, const char* value) {
     
     // Calculate Risk Score
     int riskScore = 0;
-    if (state.threat == "HIGH") riskScore = 90;
-    else if (state.threat == "LOW") riskScore = 30;
+   if (state.threat == "HIGH")
+    riskScore = 90;
+else if (state.threat == "MEDIUM")
+    riskScore = 60;
+else if (state.threat == "LOW")
+    riskScore = 30;
     
     // Requirements #5: Create an Insight field based on sensor values and threat level
     String insight = "Normal Operations";
     if (strcmp(eventType, "THREAT_DETECTED") == 0) {
-         if (state.threat == "HIGH") insight = "Critical: Multi-sensor breach confirmed";
-         else if (state.threat == "LOW") insight = "Warning: Perimeter activity detected";
-    } else if (strcmp(eventType, "ALARM_TRIGGERED") == 0) {
+
+     if (state.threat == "HIGH")
+         insight = "Critical: Immediate threat detected";
+
+     else if (state.threat == "MEDIUM")
+         insight = "Warning: Object approaching restricted area";
+
+     else if (state.threat == "LOW")
+         insight = "Notice: Activity detected at perimeter";
+}
+    else if (strcmp(eventType, "ALARM_TRIGGERED") == 0) {
          insight = "Action Required: Alarm activated";
     } else if (strcmp(eventType, "ALARM_STOPPED") == 0) {
          insight = "System Reset: Alarm suppressed";
@@ -408,25 +422,45 @@ void loop() {
     }
 
     // 4. DETECTION LOGIC
-    bool usActive = (state.systemEnabled && state.ultrasonicEnabled && state.distance > 0 && state.distance < DISTANCE_THRESHOLD_CM);
-    if (!state.systemEnabled) {
-        state.threat = "NONE";
-    } else if (state.motion && usActive) {
-        state.threat = "HIGH";
-    } else if (state.motion) {
-        state.threat = "HIGH";
-    } else if (usActive) {
-        state.threat = "LOW";
-    } else {
+    // 4. DETECTION LOGIC
+
+if (!state.systemEnabled) {
+    state.threat = "NONE";
+}
+else if (state.motion) {
+    state.threat = "HIGH";
+}
+else if (state.ultrasonicEnabled) {
+
+    if (state.distance > 0 && state.distance <= 30) {
+        state.threat = "HIGH";      // Very close object
+    }
+    else if (state.distance > 30 && state.distance <= 70) {
+        state.threat = "MEDIUM";    // Suspicious proximity
+    }
+    else if (state.distance > 70 && state.distance <= 100) {
+        state.threat = "LOW";       // Distant object
+    }
+    else {
         state.threat = "NONE";
     }
+}
+else {
+    state.threat = "NONE";
+}
 
     if (state.threat != lastThreat) {
-        if (state.threat == "HIGH" || state.threat == "LOW") {
-            logEvent("THREAT_DETECTED", state.threat.c_str());
-        }
-        lastThreat = state.threat;
+
+    if (
+        state.threat == "HIGH" ||
+        state.threat == "MEDIUM" ||
+        state.threat == "LOW"
+    ) {
+        logEvent("THREAT_DETECTED", state.threat.c_str());
     }
+
+    lastThreat = state.threat;
+}
 
     if (state.threat == "HIGH" && !alarmActive && state.alarmEnabled) {
         alarmActive = true;

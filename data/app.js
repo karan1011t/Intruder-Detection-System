@@ -39,15 +39,16 @@
         document.getElementById('uptime').innerText = data.uptime + 's';
 
         const badge = document.getElementById('threat-badge');
-        badge.innerText = data.threat;
-        badge.className = `threat-${data.threat} fw-bold fs-3`;
+badge.innerText = data.threat;
+badge.className = `fw-bold fs-3 threat-${data.threat.toLowerCase()}`;
 
-        if (data.threat === 'HIGH') {
-            document.body.classList.add('body-threat-high');
-            beep();
-        } else {
-            document.body.classList.remove('body-threat-high');
-        }
+if (data.threat === 'HIGH') {
+    document.body.classList.add('body-threat-high');
+    beep();
+}
+else {
+    document.body.classList.remove('body-threat-high');
+}
 
         document.getElementById('sensor-motion').innerText   = data.motion ? 'DETECTED' : 'CLEAR';
         document.getElementById('sensor-distance').innerText = data.distance;
