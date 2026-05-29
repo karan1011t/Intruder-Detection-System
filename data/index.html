@@ -26,28 +26,42 @@
         </header>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col">
                 <div class="status-card">
                     <span class="card-label">MAIN SYSTEM</span>
                     <div id="system-status" class="fs-4">...</div>
                     <button class="btn btn-custom w-100 mt-2" onclick="toggleOption('system')">TOGGLE</button>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <div class="status-card">
                     <span class="card-label">PIR SENSOR</span>
                     <div id="pir-status" class="fs-4">...</div>
                     <button class="btn btn-custom w-100 mt-2" onclick="toggleOption('pir')">TOGGLE</button>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <div class="status-card">
                     <span class="card-label">ULTRASONIC</span>
                     <div id="ultrasonic-status" class="fs-4">...</div>
                     <button class="btn btn-custom w-100 mt-2" onclick="toggleOption('ultrasonic')">TOGGLE</button>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
+                <div class="status-card">
+                    <span class="card-label">AUTO ALARM</span>
+                    <div id="auto-alarm-status" class="fs-4">...</div>
+                    <button class="btn btn-custom w-100 mt-2" onclick="toggleOption('alarmEnabled')">TOGGLE</button>
+                </div>
+            </div>
+            <div class="col">
+                <div class="status-card">
+                    <span class="card-label">BUZZER</span>
+                    <div id="buzzer-status" class="fs-4">...</div>
+                    <button class="btn btn-custom w-100 mt-2" onclick="toggleOption('buzzerEnabled')">MUTE/UNMUTE</button>
+                </div>
+            </div>
+            <div class="col">
                 <div class="status-card border-danger text-danger">
                     <span class="card-label text-danger">ALARM SIREN</span>
                     <div id="alarm-status" class="fs-4">...</div>

@@ -61,6 +61,8 @@
         syncCard('system-status',     data.system,            data.system            ? 'ARMED'   : 'DISARMED');
         syncCard('pir-status',        data.pirEnabled,        data.pirEnabled        ? 'ONLINE'  : 'OFFLINE');
         syncCard('ultrasonic-status', data.ultrasonicEnabled, data.ultrasonicEnabled ? 'ONLINE'  : 'OFFLINE');
+        syncCard('auto-alarm-status', data.alarmEnabled,      data.alarmEnabled      ? 'ENABLED' : 'DISABLED');
+        syncCard('buzzer-status',     data.buzzerEnabled,     data.buzzerEnabled     ? 'ENABLED' : 'MUTED');
         syncCard('alarm-status',      data.alarm,             data.alarm             ? 'ACTIVE'  : 'IDLE');
 
         if (data.eventCount !== localEventCount) {
@@ -99,10 +101,12 @@
 
     window.toggleOption = (option) => {
         const map = {
-            system:     !currentData.system,
-            pir:        !currentData.pirEnabled,
-            ultrasonic: !currentData.ultrasonicEnabled,
-            alarm:      !currentData.alarm
+            system:       !currentData.system,
+            pir:          !currentData.pirEnabled,
+            ultrasonic:   !currentData.ultrasonicEnabled,
+            alarmEnabled: !currentData.alarmEnabled,
+            buzzerEnabled: !currentData.buzzerEnabled,
+            alarm:        !currentData.alarm
         };
         if (option in map) sendControl({ [option]: map[option] });
     };

@@ -26,10 +26,11 @@ const char* LOG_FILE = "/logs.csv";
 struct SystemState {
     bool motion = false;
     long distance = 999;
-    bool alarm = false;
     bool systemEnabled = true;
     bool pirEnabled = true;
     bool ultrasonicEnabled = true;
+    bool alarmEnabled = true;
+    bool buzzerEnabled = true;
     String threat = "NONE";
     unsigned long uptime = 0;
     int eventCount = 0;
@@ -214,6 +215,8 @@ void setup() {
         doc["system"] = state.systemEnabled;
         doc["pirEnabled"] = state.pirEnabled;
         doc["ultrasonicEnabled"] = state.ultrasonicEnabled;
+        doc["alarmEnabled"] = state.alarmEnabled;
+        doc["buzzerEnabled"] = state.buzzerEnabled;
         doc["threat"] = state.threat;
         doc["uptime"] = millis() / 1000;
         doc["eventCount"] = state.eventCount;
@@ -236,6 +239,8 @@ void setup() {
             if (doc["system"].is<bool>()) state.systemEnabled = doc["system"];
             if (doc["pir"].is<bool>()) state.pirEnabled = doc["pir"];
             if (doc["ultrasonic"].is<bool>()) state.ultrasonicEnabled = doc["ultrasonic"];
+            if (doc["alarmEnabled"].is<bool>()) state.alarmEnabled = doc["alarmEnabled"];
+            if (doc["buzzerEnabled"].is<bool>()) state.buzzerEnabled = doc["buzzerEnabled"];
             if (doc["alarm"].is<bool>()) {
                 bool trigger = doc["alarm"];
                 if (trigger && !alarmActive) {
@@ -328,7 +333,7 @@ void setup() {
     server.on("/synctime", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
         JsonDocument doc;
         DeserializationError err = deserializeJson(doc, (const char*)data, len);
-        if (!err && doc.containsKey("time")) {
+        if (!err && doc["time"].is<unsigned long>()) {
             struct timeval tv;
             tv.tv_sec = doc["time"].as<unsigned long>();
             tv.tv_usec = 0;
@@ -423,7 +428,7 @@ void loop() {
         lastThreat = state.threat;
     }
 
-    if (state.threat == "HIGH" && !alarmActive) {
+    if (state.threat == "HIGH" && !alarmActive && state.alarmEnabled) {
         alarmActive = true;
         alarmTriggerTime = currentMillis;
         state.lastIntrusionTs = currentMillis / 1000;
@@ -439,7 +444,7 @@ void loop() {
             logEvent("ALARM_STOPPED", "Timeout Reached");
         } else {
             bool strobe = ((currentMillis / 250) % 2 == 0);
-            digitalWrite(BUZZER_PIN, strobe ? HIGH : LOW);
+            digitalWrite(BUZZER_PIN, (strobe && state.buzzerEnabled) ? HIGH : LOW);
             digitalWrite(ALERT_LED, strobe ? HIGH : LOW);
         }
     } else {
